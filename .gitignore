@@ -1,0 +1,94 @@
+# ========================
+# Environment & Secrets
+# ========================
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ========================
+# Go (backend/)
+# ========================
+# Binaries
+backend/bin/
+backend/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+coverage.out
+cpu.prof
+
+
+# Test & coverage
+*.test
+*.out
+backend/coverage.html
+backend/coverage.txt
+
+# Air live reload
+backend/tmp/
+
+# Go workspace
+go.work
+go.work.sum
+
+# ========================
+# Next.js (frontend/)
+# ========================
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.swc/
+
+# ========================
+# Node (frontend/)
+# ========================
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+
+# ========================
+# Database
+# ========================
+postgres-data/
+typesense-data/
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+
+# ========================
+# Editor & OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+
+*.swp
+*.swo
+*~
+
+# ========================
+# Logs
+# ========================
+*.log
+logs/
+
+# ========================
+# sqlc generated files
+# ========================
+# Uncomment to generate in CI instead:
+# backend/internal/db/
