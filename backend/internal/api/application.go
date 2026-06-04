@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/devaraja-anu/agrilib/internal/config"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type application struct {
@@ -16,15 +16,15 @@ type application struct {
 
 func NewApplication(cfg config.Config, log *slog.Logger, database *pgxpool.Pool) *application {
 	return &application{
-		config:  cfg,
+		config: cfg,
 		logger: log,
-		db: database,
+		db:     database,
 	}
 }
 
 func (app *application) Start() error {
 	addr := ":" + app.config.Port
-    app.logger.Info("server starting", "addr", addr)
+	app.logger.Info("server starting", "addr", addr)
 
-    return http.ListenAndServe(addr, app.routes())
+	return http.ListenAndServe(addr, app.routes())
 }
