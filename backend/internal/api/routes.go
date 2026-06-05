@@ -19,5 +19,7 @@ func (app *application) routes() http.Handler {
 		w.Write([]byte("Hello World"))
 	})
 
+	r.Get("/v1/healthcheck",healthCheck)
+
 	return r
 }

@@ -11,6 +11,7 @@ import (
 
 type IPStrategy string
 type AppEnv string
+type secret string
 
 const (
 	IPStrategyRemoteAddr   IPStrategy = "remote_addr"   // no proxy, direct / local dev
@@ -20,64 +21,79 @@ const (
 )
 
 type Config struct {
-	DatabaseURL       string
+	DatabaseURL       secret
 	Port              string
 	AppEnv            AppEnv
 	IPStrategy        IPStrategy
 	TrustedProxyCIDRs []string
 	ClientIPHeader    string
 
-	TypesenseKey      string
-	FirebaseProject   string
-	RedisURL          string
-	JWTSecret         string
+	TypesenseKey    string
+	FirebaseProject string
+	RedisURL        string
+	JWTSecret       secret
+}
+
+func (s secret) LogValue() slog.Value {
+	return slog.StringValue("********")
+}
+
+func (s secret) String() string {
+	return "********"
 }
 
 // config.go
 func Load() (Config, error) {
-    envApp := getEnv("APP_ENV", "development")
 
-    if envApp != "production" {
-        if err := godotenv.Load(); err != nil {
-            slog.Warn("no .env file found, relying on environment variables")
-        }
-    }
+    // APP_ENV is read before godotenv.Load() intentionally —
+// it must come from the real environment, never from a .env file.
+	envApp := getEnv("APP_ENV", "development")
 
-    cfg := Config{
-        AppEnv:            AppEnv(envApp),
-        DatabaseURL:       os.Getenv("DATABASE_URL"),
-        // RedisURL:          os.Getenv("REDIS_URL"),
-        // JWTSecret:         os.Getenv("JWT_SECRET"),
-        // TypesenseKey:      os.Getenv("TYPESENSE_API_KEY"),
-        // FirebaseProject:   os.Getenv("FIREBASE_PROJECT_ID"),
-        Port:              getEnv("PORT", "8080"),
-        IPStrategy:        IPStrategy(getEnv("IP_STRATEGY", "remote_addr")),
-        TrustedProxyCIDRs: splitNonEmpty(getEnv("TRUSTED_PROXY_CIDRS", "")),
-        ClientIPHeader:    getEnv("CLIENT_IP_HEADER", ""),
-    }
+	if envApp != "production" {
+		if err := godotenv.Load(); err != nil {
+			slog.Warn("no .env file found, relying on environment variables")
+		}
+	}
 
-    if err := cfg.validate(); err != nil {
-        return Config{}, err
-    }
+	cfg := Config{
+		AppEnv:      AppEnv(envApp),
+		DatabaseURL: secret(os.Getenv("DATABASE_URL")),
+		// RedisURL:          os.Getenv("REDIS_URL"),
+		// JWTSecret:         secret(os.Getenv("JWT_SECRET")),
+		// TypesenseKey:      os.Getenv("TYPESENSE_API_KEY"),
+		// FirebaseProject:   os.Getenv("FIREBASE_PROJECT_ID"),
+		Port:              getEnv("PORT", "8080"),
+		IPStrategy:        IPStrategy(getEnv("IP_STRATEGY", "remote_addr")),
+		TrustedProxyCIDRs: splitNonEmpty(getEnv("TRUSTED_PROXY_CIDRS", "")),
+		ClientIPHeader:    getEnv("CLIENT_IP_HEADER", ""),
+	}
 
-    return cfg, nil
+	if err := cfg.validate(); err != nil {
+		return Config{}, err
+	}
+
+	return cfg, nil
+}
+
+func (s secret) Reveal() string {
+    return string(s)
 }
 
 func (c Config) validate() error {
-    var missing []string
+	var missing []string
 
-    if c.DatabaseURL == "" {
-        missing = append(missing, "DATABASE_URL")
-    }
-    // if c.RedisURL == "" {
-    //     missing = append(missing, "REDIS_URL")
-    // }
+	if c.DatabaseURL == "" {
+		missing = append(missing, "DATABASE_URL")
+	}
+	// if c.RedisURL == "" {
+	//     missing = append(missing, "REDIS_URL")
+	// }
 
-    if len(missing) > 0 {
-        return fmt.Errorf("missing required environment variables: %s", strings.Join(missing, ", "))
-    }
+	if len(missing) > 0 {
+		return fmt.Errorf("missing required environment variables: %s", strings.Join(missing, ", "))
+	}
 
-    return nil
+	return nil
 }
 
 // getEnv reads an environment variable, returning fallback if it's unset or empty.
