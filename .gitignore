@@ -92,3 +92,6 @@ logs/
 # ========================
 # Uncomment to generate in CI instead:
 # backend/internal/db/
+
+
+DECISIONS.md

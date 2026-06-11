@@ -42,12 +42,13 @@ func (app *application) Serve() error {
 		ReadHeaderTimeout: 2 * time.Second,
 	}
 
-	shutdownError := make(chan error)
+	shutdownError := make(chan error,1)
 
 	go func() {
 
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		defer signal.Stop(quit)
 		s := <-quit
 
 		app.logger.Info("shutting down server", "signal", s.String())
@@ -61,6 +62,8 @@ func (app *application) Serve() error {
 		}
 
 		app.logger.Info("completing background tasks", "address", srv.Addr)
+
+		app.db.Close()
 
 		app.wg.Wait()
 		shutdownError <- nil

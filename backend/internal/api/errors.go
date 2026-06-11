@@ -27,7 +27,7 @@ type errorEnvelope struct {
 }
 
 func badRequest(w http.ResponseWriter, r *http.Request, err error) {
-	writeJSON(w, r, http.StatusBadRequest, apiError{Message: err.Error(), Code: ErrCodeBadRequest})
+	writeJSON(w, r, http.StatusBadRequest, errorEnvelope{ Error:apiError{Message: err.Error(), Code: ErrCodeBadRequest}})
 }
 
 func validationError(w http.ResponseWriter, r *http.Request, err error) {

@@ -20,9 +20,9 @@ const (
 
 const maxBodyBytes = 1_048_576 // 1MB
 
-func readJSON(r *http.Request, dst any) error {
+func readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 
-	r.Body = http.MaxBytesReader(nil, r.Body, maxBodyBytes)
+	r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
 
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
@@ -37,6 +37,7 @@ func readJSON(r *http.Request, dst any) error {
 		switch {
 		case errors.As(err, &syntaxErr):
 			return fmt.Errorf("malformed json at character %d", syntaxErr.Offset)
+		// io.ErrUnexpectedEOF should be checked before io.EOF. 
 		case errors.Is(err, io.ErrUnexpectedEOF):
 			return errors.New("malformed json: unexpected end of Input")
 		case errors.As(err, &unmarshalTypeErr):
@@ -44,14 +45,15 @@ func readJSON(r *http.Request, dst any) error {
 				return fmt.Errorf("incorrect type for field %q", unmarshalTypeErr.Field)
 			}
 			return fmt.Errorf("incorrect type at character %d", unmarshalTypeErr.Offset)
+		//  this way to check EOF is correct for json.Decoder, not json.Unmarshal
 		case errors.Is(err, io.EOF):
 			return errors.New("request body must not be empty")
 
 		case strings.HasPrefix(err.Error(), "json: unknown field"):
-			field := strings.TrimPrefix(err.Error(), "json: unknown field")
+			field := strings.TrimPrefix(err.Error(), `json: unknown field `)
 			return fmt.Errorf("unknown field %s", field)
 		case err.Error() == "http: request body too large":
-			return fmt.Errorf("request body must not exceed 1 MB")
+			return fmt.Errorf("request body must not exceed %d bytes", maxBodyBytes)
 		case errors.As(err, &invalidUnmarshal):
 			panic(fmt.Sprintf("readJSON: invalid unmarshal target: %v", err))
 		default:

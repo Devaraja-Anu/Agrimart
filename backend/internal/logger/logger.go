@@ -59,6 +59,6 @@ func RequestAttrs(method, path, requestID, ip string) []any {
 }
 
 func LatencyAttr(start time.Time) slog.Attr {
-	return  slog.Duration("latency_ms", time.Since(start).Round(time.Millisecond))
+	return  slog.Duration("latency", time.Since(start).Round(time.Millisecond))
 }
 

@@ -56,6 +56,8 @@ func Load() (Config, error) {
 	}
 
 	cfg := Config{
+		// uncomment as required
+
 		AppEnv:      AppEnv(envApp),
 		DatabaseURL: secret(os.Getenv("DATABASE_URL")),
 		// RedisURL:          os.Getenv("REDIS_URL"),

@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -15,7 +16,7 @@ func NewPool(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 	}
 
 	config.MaxConns = 10
-	config.MaxConnIdleTime = 15*60
+	config.MaxConnIdleTime = 15 * time.Minute
 	config.MinConns = 2
 
 	pool, err := pgxpool.NewWithConfig(ctx, config)
