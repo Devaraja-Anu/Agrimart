@@ -2,7 +2,7 @@
 CREATE TYPE region_type AS ENUM ('country','state','district');
 
 CREATE TABLE regions (
-    id  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id  UUID DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     region_type region_type NOT NULL,
     parent_id UUID REFERENCES regions(id) ON DELETE RESTRICT,

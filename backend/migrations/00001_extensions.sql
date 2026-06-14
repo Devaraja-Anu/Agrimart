@@ -8,6 +8,11 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- +goose Down
-DROP EXTENSION IF EXISTS pg_trgm;
-DROP EXTENSION IF EXISTS postgis;
-DROP EXTENSION IF EXISTS "uuid-ossp";
+
+-- Extensions are global to the database. They do not get "activated"
+--  per table; they are simply installed. Keeping them installed is harmless.
+
+
+-- DROP EXTENSION IF EXISTS pg_trgm;
+-- DROP EXTENSION IF EXISTS postgis;
+-- DROP EXTENSION IF EXISTS "uuid-ossp";

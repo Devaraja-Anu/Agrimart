@@ -62,9 +62,6 @@ func (app *application) Serve() error {
 		}
 
 		app.logger.Info("completing background tasks", "address", srv.Addr)
-
-		app.db.Close()
-
 		app.wg.Wait()
 		shutdownError <- nil
 	}()

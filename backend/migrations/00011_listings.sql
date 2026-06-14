@@ -1,4 +1,9 @@
 -- +goose Up
+-- Note: both CREATE FUNCTION blocks below use goose StatementBegin/StatementEnd
+-- markers (the goose directive comments, not shown in this sentence to avoid
+-- confusing the migration parser). See 00004_functions.sql for why these are
+-- required — goose's default statement splitter does not understand $$
+-- dollar-quoted function bodies and mangles them without these markers.
 CREATE TYPE listing_type AS ENUM ('product', 'service');
 
 CREATE TYPE listing_status AS ENUM (
@@ -18,14 +23,19 @@ CREATE TYPE listing_status AS ENUM (
 -- NULL on all other listing types (soil testing, advisory, certification etc.)
 -- where availability is a seller-level concern, not a listing-level one.
 -- The application only renders the availability UI when this field IS NOT NULL,
-
 -- driven by the listing's category type.
+--
+-- Intentionally separate from listing_status — lifecycle (is this listing
+-- published?) and availability (is this asset obtainable right now?) are
+-- independent concerns. A listing can be active but booked, or active and
+-- available. Collapsing them into one enum loses that expressiveness.
+--
 -- Deferred: a full availability calendar / booking flow is V2. This enum
 -- is the V1 approximation — seller-managed, manual, good enough for
 -- "farmers willing to wait a day or two."
 CREATE TYPE listing_availability AS ENUM (
-    'available',      
-    'booked',         
+    'available',      -- free now, can be booked immediately
+    'booked',         -- taken until available_from date; set available_from when using this
     'contact_seller'  -- availability is complex or variable; buyer should WhatsApp to confirm
 );
 
@@ -76,7 +86,7 @@ CREATE TABLE listings (
     CONSTRAINT listings_photos_max CHECK (array_length(photos, 1) <= 5),
 
     -- available_from is only meaningful when availability = 'booked'.
-
+    -- Prevent it being set when availability is NULL or not 'booked' —
     -- a future date on an 'available' listing would be confusing.
     CONSTRAINT listings_available_from_requires_booked CHECK (
         available_from IS NULL OR availability = 'booked'
@@ -130,6 +140,7 @@ CREATE TRIGGER set_listings_updated_at
 -- weighted columns: title at weight A, description at weight B.
 -- Fires only on INSERT or changes to title/description — not on status updates,
 -- view_count increments, or other field changes.
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION listings_search_vector_update()
     RETURNS TRIGGER
     LANGUAGE plpgsql
@@ -141,6 +152,7 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+-- +goose StatementEnd
 
 CREATE TRIGGER listings_search_vector_update
     BEFORE INSERT OR UPDATE OF title, description ON listings
@@ -153,6 +165,7 @@ CREATE TRIGGER listings_search_vector_update
 -- price was last confirmed, which is the buyer-facing freshness signal.
 -- When a quantity column is added in V2, it gets its own column and trigger
 -- in a new migration — do not add it here.
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION listings_price_updated_at()
     RETURNS TRIGGER
     LANGUAGE plpgsql
@@ -162,6 +175,7 @@ BEGIN
     RETURN NEW;
 END;
 $$;
+-- +goose StatementEnd
 
 CREATE TRIGGER listings_price_updated_at
     BEFORE UPDATE OF price, price_unit ON listings

@@ -7,7 +7,7 @@ import (
 
 	"github.com/devaraja-anu/agrilib/internal/api"
 	"github.com/devaraja-anu/agrilib/internal/config"
-	"github.com/devaraja-anu/agrilib/internal/db"
+	"github.com/devaraja-anu/agrilib/internal/db/database"
 	"github.com/devaraja-anu/agrilib/internal/logger"
 )
 
@@ -24,7 +24,7 @@ func main() {
 
 	ctx := context.Background()
 
-	pool, err := db.NewPool(ctx, cfg.DatabaseURL.Reveal())
+	pool, err := database.NewPool(ctx, cfg.DatabaseURL.Reveal())
 	if err != nil {
 		slog.Error("Unable to intialize DB", "error", err)
 		os.Exit(1)
@@ -40,4 +40,3 @@ func main() {
 	}
 
 }
-

@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE service_areas(
     id UUID NOT NULL DEFAULT uuid_generate_v4(),
-    seller_profile_id UUID REFERENCES seller_proflies(id) ON DELETE CASCADE,
+    seller_profile_id UUID REFERENCES seller_profiles(id) ON DELETE CASCADE,
     region_id UUID NOT NULL REFERENCES regions(id) ON DELETE RESTRICT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
