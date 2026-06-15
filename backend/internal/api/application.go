@@ -14,20 +14,23 @@ import (
 
 	"github.com/devaraja-anu/agrilib/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type application struct {
 	config config.Config
 	logger *slog.Logger
 	db     *pgxpool.Pool
+	redis  *redis.Client
 	wg     sync.WaitGroup
 }
 
-func NewApplication(cfg config.Config, log *slog.Logger, database *pgxpool.Pool) *application {
+func NewApplication(cfg config.Config, log *slog.Logger, database *pgxpool.Pool, redisClient *redis.Client) *application {
 	return &application{
 		config: cfg,
 		logger: log,
 		db:     database,
+		redis:  redisClient,
 	}
 }
 
@@ -42,7 +45,7 @@ func (app *application) Serve() error {
 		ReadHeaderTimeout: 2 * time.Second,
 	}
 
-	shutdownError := make(chan error,1)
+	shutdownError := make(chan error, 1)
 
 	go func() {
 

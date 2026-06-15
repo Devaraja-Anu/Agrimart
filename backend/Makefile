@@ -11,6 +11,12 @@ DC := docker compose
 
 .DEFAULT_GOAL := help
 
+
+## run: run main.go
+run:
+	go run ./cmd/server
+
+
 ## help: show available commands
 help:
 	@echo "Usage:"

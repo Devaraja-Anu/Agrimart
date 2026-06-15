@@ -32,7 +32,7 @@ type Config struct {
 
 	TypesenseKey    string
 	FirebaseProject string
-	RedisURL        string
+	RedisURL        secret
 	JWTSecret       secret
 }
 
@@ -63,7 +63,7 @@ func Load() (Config, error) {
 		AppEnv:      AppEnv(envApp),
 		DatabaseURL: secret(os.Getenv("DATABASE_URL")),
 		FrontendURL: getEnv("FRONTEND_URL","http://localhost:3000"),
-		// RedisURL:          os.Getenv("REDIS_URL"),
+		RedisURL:          secret(os.Getenv("REDIS_URL")),
 		// JWTSecret:         secret(os.Getenv("JWT_SECRET")),
 		// TypesenseKey:      os.Getenv("TYPESENSE_API_KEY"),
 		// FirebaseProject:   os.Getenv("FIREBASE_PROJECT_ID"),
