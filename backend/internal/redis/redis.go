@@ -16,7 +16,7 @@ func NewClient(ctx context.Context, url string) (*redis.Client, error) {
 
 	err = client.Ping(ctx).Err()
 	if err != nil {
-		client.Close()
+		_ = client.Close()
 		return nil, err
 	}
 

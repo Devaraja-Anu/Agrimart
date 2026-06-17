@@ -49,9 +49,19 @@ func TestFromContext_ReturnsStoredLogger(t *testing.T) {
 }
 
 func TestLatencyAttr(t *testing.T) {
-	start := time.Now().Add(-42 * time.Millisecond)
+		start := time.Now().Add(-42 * time.Millisecond)
+
 	attr := logger.LatencyAttr(start)
-	if attr.Key != "latency_ms" {
-		t.Errorf("unexpected key: %s", attr.Key)
+
+	if attr.Key != "latency" {
+		t.Fatalf("got key %q, want %q", attr.Key, "latency")
+	}
+
+	if attr.Value.Kind() != slog.KindDuration {
+		t.Fatalf("expected duration value, got %v", attr.Value.Kind())
+	}
+
+	if attr.Value.Duration() < 40*time.Millisecond {
+		t.Fatalf("unexpected duration: %v", attr.Value.Duration())
 	}
 }

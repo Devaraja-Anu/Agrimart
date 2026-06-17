@@ -13,24 +13,30 @@ import (
 	"time"
 
 	"github.com/devaraja-anu/agrilib/internal/config"
+	"github.com/devaraja-anu/agrilib/internal/db"
+	"github.com/devaraja-anu/agrilib/internal/sms"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
 
 type application struct {
-	config config.Config
-	logger *slog.Logger
-	db     *pgxpool.Pool
-	redis  *redis.Client
-	wg     sync.WaitGroup
+	config    config.Config
+	logger    *slog.Logger
+	db        *pgxpool.Pool
+	queries   *db.Queries
+	redis     *redis.Client
+	wg        sync.WaitGroup
+	smsSender *sms.LogSender
 }
 
-func NewApplication(cfg config.Config, log *slog.Logger, database *pgxpool.Pool, redisClient *redis.Client) *application {
+func NewApplication(cfg config.Config, log *slog.Logger, database *pgxpool.Pool, 
+	redisClient *redis.Client, smsSender *sms.LogSender,queries *db.Queries) *application {
 	return &application{
-		config: cfg,
-		logger: log,
-		db:     database,
-		redis:  redisClient,
+		config:    cfg,
+		logger:    log,
+		db:        database,
+		redis:     redisClient,
+		smsSender: smsSender,
 	}
 }
 

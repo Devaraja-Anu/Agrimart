@@ -16,6 +16,8 @@ DC := docker compose
 run:
 	go run ./cmd/server
 
+test:
+	go test -v ./...
 
 ## help: show available commands
 help:
